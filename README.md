@@ -196,6 +196,7 @@ cat /path/imroot.txt
 important ports - 22,23,80,2222(hydra -s for custom ports), 3389(RDp),
 5555(adb), 5552(NJRat) 
 
+find / -name Netnormal.txt 2>/dev/null
 
 
 
