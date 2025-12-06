@@ -188,7 +188,13 @@ Still nothing? → Run the second enumerator
 wget https://raw.githubusercontent.com/carlospolop/PEASS-ng/master/linPEAS/linpeas.sh -O /tmp/lp2; /tmp/lp2 (sometimes the first download is cached/old)
 -> LinPEAS almost never misses anything twice
 
+sudo -i 
+cd /
+find . -name imroot.txt
+cat /path/imroot.txt
 
+important ports - 22,23,80,2222(hydra -s for custom ports), 3389(RDp),
+5555(adb), 5552(NJRat) 
 
 
 
